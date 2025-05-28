@@ -124,15 +124,28 @@ exports.updateNarrative = async (req, res) => {
 };
 
 exports.deleteNarrative = async (req, res) => {
-  const { id } = req.params;
-
   try {
-    await prisma.narrative.delete({
+    const { id } = req.params;
+
+    const narrative = await prisma.narrative.findUnique({
       where: { id },
+      include: { images: true },
     });
 
+    if (!narrative || narrative.authorId !== req.user.id) {
+      return res.status(403).json({
+        message: "Unauthorized",
+      });
+    }
+
+    for (const img of narrative.images) {
+      await cloudinary.uploader.destroy(img.filename);
+    }
+
+    await prisma.narrative.delete({ where: { id } });
+
     res.json({
-      message: "Narrative deleted successfully",
+      message: "Narrative and associated images deleted successfully",
     });
   } catch (error) {
     console.error("Error deleting narrative:", error);

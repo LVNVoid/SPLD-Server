@@ -4,6 +4,7 @@ const reportRouter = require("./routes/reportRouter");
 const userRouter = require("./routes/userRouter");
 const narrativeRouter = require("./routes/narrativeRouter");
 const authRouter = require("./routes/authRouter");
+const uploadRouter = require("./routes/uploadRouter");
 const cookieParser = require("cookie-parser");
 const app = express();
 
@@ -14,6 +15,7 @@ const PORT = process.env.PORT;
 app.use(express.json());
 app.use(cookieParser());
 
+app.use("/api/upload", uploadRouter);
 app.use("/api/reports", reportRouter);
 app.use("/api/users", userRouter);
 app.use("/api/narratives", narrativeRouter);

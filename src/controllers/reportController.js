@@ -1,4 +1,5 @@
 const { PrismaClient } = require("../generated/prisma");
+const { cloudinary } = require("../utils/cloudinary");
 const prisma = new PrismaClient();
 
 exports.getAllReports = async (req, res) => {
@@ -133,22 +134,27 @@ exports.updateReport = async (req, res) => {
   }
 };
 
-exports.deleteReport = async (req, res) => {
-  const { id } = req.params;
-
+exports.deleteReport = async (req, res, next) => {
   try {
-    await prisma.report.delete({
+    const { id } = req.params;
+
+    const report = await prisma.report.findUnique({
       where: { id },
+      include: { images: true },
     });
 
-    res.json({
-      message: "Report deleted successfully",
-    });
+    if (!report || report.authorId !== req.user.id) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    for (const img of report.images) {
+      await cloudinary.uploader.destroy(img.filename);
+    }
+
+    await prisma.report.delete({ where: { id } });
+
+    res.json({ message: "Report and associated images deleted" });
   } catch (error) {
-    console.error("Error deleting report:", error);
-    res.status(500).json({
-      message: "Error deleting report",
-      error: error.message,
-    });
+    next(error);
   }
 };
