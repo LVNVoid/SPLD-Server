@@ -1,0 +1,116 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator seed {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id         String      @id @default(uuid())
+  name       String
+  email      String      @unique
+  role       Role        @default(POLSEK)
+  password   String
+  polsekId   String?
+  polsek     Polsek?     @relation(fields: [polsekId], references: [id], onDelete: SetNull)
+  reports    Report[] // Reports created by user (POLSEK role)
+  narratives Narrative[] // Narratives created by user (HUMAS role)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  HUMAS
+  POLSEK
+}
+
+model Polsek {
+  id        String   @id @default(uuid())
+  name      String
+  users     User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("polseks")
+}
+
+model Report {
+  id          String        @id @default(uuid())
+  title       String
+  description String
+  date        DateTime
+  images      ReportImage[]
+  narrative   Narrative? // One-to-one relation with Narrative
+  author      User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId    String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("reports")
+}
+
+model ReportImage {
+  id        String   @id @default(uuid())
+  url       String
+  filename  String?
+  alt       String? // For accessibility
+  report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  reportId  String
+  createdAt DateTime @default(now())
+
+  @@map("report_images")
+}
+
+model Narrative {
+  id          String           @id @default(uuid())
+  title       String
+  content     String           @db.Text // Using Text for longer content
+  publishedAt DateTime? // When the narrative is published
+  status      NarrativeStatus  @default(DRAFT)
+  images      NarrativeImage[]
+  report      Report           @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  reportId    String           @unique // One-to-one relation
+  author      User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId    String // HUMAS user who created the narrative
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@map("narratives")
+}
+
+model NarrativeImage {
+  id          String    @id @default(uuid())
+  url         String
+  filename    String?
+  alt         String? // For accessibility
+  caption     String? // Image caption for narrative
+  order       Int       @default(0) // Order of images in narrative
+  narrative   Narrative @relation(fields: [narrativeId], references: [id], onDelete: Cascade)
+  narrativeId String
+  createdAt   DateTime  @default(now())
+
+  @@map("narrative_images")
+}
+
+enum NarrativeStatus {
+  DRAFT
+  REVIEW
+  PUBLISHED
+  ARCHIVED
+}
