@@ -16,6 +16,7 @@ exports.login = async (req, res) => {
 
     const token = generateToken({
       id: user.id,
+      name: user.name,
       email: user.email,
       role: user.role,
     });
@@ -23,13 +24,18 @@ exports.login = async (req, res) => {
     res
       .cookie("token", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: false,
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        sameSite: "strict",
+        sameSite: "lax",
       })
       .json({
         message: "Login successful",
-        user: { id: user.id, name: user.name, role: user.role },
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
       });
   } catch (error) {
     console.error("Login error:", error);
