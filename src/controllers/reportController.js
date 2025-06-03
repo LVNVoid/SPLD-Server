@@ -6,16 +6,9 @@ exports.getAllReports = async (req, res) => {
   try {
     const reports = await prisma.report.findMany({
       include: {
-        images: true,
+        images: false,
         author: {
           select: { name: true, email: true },
-        },
-        narrative: {
-          select: {
-            id: true,
-            title: true,
-            status: true,
-          },
         },
       },
     });
