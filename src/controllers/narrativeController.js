@@ -1,4 +1,5 @@
 const { PrismaClient } = require("../generated/prisma");
+const { cloudinary } = require("../utils/cloudinary");
 const prisma = new PrismaClient();
 
 exports.getAllNarratives = async (req, res) => {
@@ -55,14 +56,14 @@ exports.getNarrativeById = async (req, res) => {
 };
 
 exports.createNarrative = async (req, res) => {
-  const { title, content, status, publishedAt, reportId, images } = req.body;
+  const { title, content, publishedAt, reportId, images } = req.body;
 
   try {
     const newNarrative = await prisma.narrative.create({
       data: {
         title,
         content,
-        status,
+        status: "DRAFT",
         publishedAt: publishedAt ? new Date(publishedAt) : null,
         reportId,
         authorId: req.user.id,

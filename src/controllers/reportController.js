@@ -8,7 +8,10 @@ exports.getAllReports = async (req, res) => {
       include: {
         images: false,
         author: {
-          select: { name: true, email: true },
+          select: {
+            name: true,
+            polsek: { select: { name: true } },
+          },
         },
       },
     });
@@ -35,7 +38,11 @@ exports.getReportById = async (req, res) => {
       include: {
         images: true,
         author: {
-          select: { name: true, email: true },
+          select: {
+            name: true,
+            email: true,
+            polsek: { select: { name: true } },
+          },
         },
         narrative: {
           select: {

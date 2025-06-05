@@ -10,7 +10,7 @@ const authenticate = require("../middleware/authenticate");
 const authorize = require("../middleware/authorize");
 const router = express.Router();
 
-const allowAccess = [authenticate, authorize(["HUMAS", "ADMIN"])];
+const allowAccess = [authenticate, authorize(["POLSEK", "HUMAS", "ADMIN"])];
 
 router.get("/", getAllNarratives);
 router.get("/:id", getNarrativeById);
