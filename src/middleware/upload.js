@@ -1,17 +1,27 @@
 const multer = require("multer");
-const { storage } = require("../utils/cloudinary");
+const { reportStorage, narrativeStorage } = require("../utils/cloudinary");
 
-const upload = multer({
-  storage,
+const fileFilter = (req, file, cb) => {
+  if (!file.mimetype.startsWith("image/")) {
+    return cb(new Error("Only image files are allowed!"), false);
+  }
+  cb(null, true);
+};
+
+const uploadReport = multer({
+  storage: reportStorage,
   limits: {
     fileSize: 5 * 1024 * 1024,
   },
-  fileFilter: (req, file, cb) => {
-    if (!file.mimetype.startsWith("image/")) {
-      return cb(new Error("Only image files are allowed!"), false);
-    }
-    cb(null, true);
-  },
+  fileFilter,
 });
 
-module.exports = upload;
+const uploadNarrative = multer({
+  storage: narrativeStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+  fileFilter,
+});
+
+module.exports = { uploadReport, uploadNarrative };

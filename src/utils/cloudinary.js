@@ -7,15 +7,22 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = new CloudinaryStorage({
+const reportStorage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: "laporan",
-    allowed_formats: ["jpg", "jpeg", "png"],
+    folder: "reports",
+    allowed_formats: ["jpg", "png", "jpeg"],
+    transformation: [{ width: 800, height: 800, crop: "limit" }],
   },
 });
 
-module.exports = {
+const narrativeStorage = new CloudinaryStorage({
   cloudinary,
-  storage,
-};
+  params: {
+    folder: "narratives",
+    allowed_formats: ["jpg", "png", "jpeg"],
+    transformation: [{ width: 800, height: 800, crop: "limit" }],
+  },
+});
+
+module.exports = { cloudinary, reportStorage, narrativeStorage };
