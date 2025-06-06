@@ -3,7 +3,13 @@ const prisma = new PrismaClient();
 
 const getAllPolsek = async (req, res) => {
   try {
-    const polseks = await prisma.polsek.findMany();
+    const polseks = await prisma.polsek.findMany({
+      include: {
+        _count: {
+          select: { users: true },
+        },
+      },
+    });
 
     res.json({
       message: "polseks retrieved successfully",
