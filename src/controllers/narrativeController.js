@@ -149,22 +149,28 @@ exports.updateNarrative = async (req, res) => {
 exports.deleteNarrative = async (req, res) => {
   try {
     const { id } = req.params;
+    const isOwner = narrative.authorId === req.user.id;
+    const isAdmin = req.user.role === "ADMIN";
 
     const narrative = await prisma.narrative.findUnique({
       where: { id },
       include: { images: true },
     });
 
-    if (!narrative || narrative.authorId !== req.user.id) {
-      return res.status(403).json({
-        message: "Unauthorized",
-      });
+    if (!narrative) {
+      return res.status(404).json({ message: "Narrative not found" });
+    }
+
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: "Unauthorized" });
     }
 
     for (const img of narrative.images) {
-      await cloudinary.uploader.destroy(img.filename);
+      const publicId = img.filename.replace(/\.[^/.]+$/, "");
+      await cloudinary.uploader.destroy(publicId);
     }
 
+    // Hapus narasi dari database
     await prisma.narrative.delete({ where: { id } });
 
     res.json({

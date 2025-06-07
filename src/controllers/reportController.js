@@ -143,12 +143,20 @@ exports.deleteReport = async (req, res, next) => {
       include: { images: true },
     });
 
-    if (!report || report.authorId !== req.user.id) {
+    if (!report) {
+      return res.status(404).json({ message: "Report not found" });
+    }
+
+    const isOwner = report.authorId === req.user.id;
+    const isAdmin = req.user.role === "ADMIN";
+
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
     for (const img of report.images) {
-      await cloudinary.uploader.destroy(img.filename);
+      const publicId = img.filename.replace(/\.[^/.]+$/, "");
+      await cloudinary.uploader.destroy(publicId);
     }
 
     await prisma.report.delete({ where: { id } });

@@ -6,6 +6,7 @@ const { uploadReport, uploadNarrative } = require("../middleware/upload");
 const {
   uploadReportImages,
   uploadNarrativeImages,
+  deleteNarrativeImage,
 } = require("../controllers/uploadController");
 
 router.post(
@@ -21,5 +22,7 @@ router.post(
   uploadNarrative.array("images", 5),
   uploadNarrativeImages
 );
+
+router.delete("/narrative/image/:imageId", authenticate, deleteNarrativeImage);
 
 module.exports = router;
