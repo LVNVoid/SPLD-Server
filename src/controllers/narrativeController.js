@@ -156,3 +156,69 @@ exports.deleteNarrative = async (req, res) => {
     });
   }
 };
+
+exports.getPublishedNarratives = async (req, res) => {
+  try {
+    const publishedNarratives = await prisma.narrative.findMany({
+      where: {
+        status: "PUBLISHED",
+      },
+      select: {
+        title: true,
+        content: true,
+        publishedAt: true,
+        images: { take: 1 },
+        author: { select: { name: true } },
+      },
+    });
+
+    if (!publishedNarratives || publishedNarratives.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "Published narratives not found" });
+    }
+
+    res.json({
+      message: "Published narratives retrieved successfully",
+      data: publishedNarratives,
+    });
+  } catch (error) {
+    console.error("Error fetching narratives:", error);
+    res.status(500).json({
+      message: "Error fetching narratives",
+      error: error.message,
+    });
+  }
+};
+
+exports.getPublishedNarrativesById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const narrative = await prisma.narrative.findUnique({
+      where: { id, status: "PUBLISHED" },
+      select: {
+        title: true,
+        content: true,
+        publishedAt: true,
+        images: true,
+        author: { select: { name: true } },
+      },
+    });
+
+    if (!narrative) {
+      return res.status(404).json({ message: "Published narrative not found" });
+    }
+
+    res.status(200).json({
+      message: "Published narrative retrieved successfully",
+      data: narrative,
+    });
+  } catch (error) {
+    console.error("Error fetching narrative:", error);
+    res.status(500).json({
+      message: "Error fetching narrative",
+      error: error.message,
+    });
+  }
+};
