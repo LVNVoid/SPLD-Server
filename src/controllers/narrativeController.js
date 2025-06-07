@@ -56,28 +56,43 @@ exports.getNarrativeById = async (req, res) => {
 };
 
 exports.createNarrative = async (req, res) => {
-  const { title, content, publishedAt, reportId, images } = req.body;
+  const {
+    title,
+    content,
+    publishedAt,
+    reportId,
+    images,
+    status = "DRAFT",
+  } = req.body;
 
   try {
-    const newNarrative = await prisma.narrative.create({
-      data: {
-        title,
-        content,
-        status: "DRAFT",
-        publishedAt: publishedAt ? new Date(publishedAt) : null,
-        reportId,
-        authorId: req.user.id,
-        images: {
-          create:
-            images?.map((img) => ({
-              url: img.url,
-              filename: img.filename,
-              alt: img.alt,
-              caption: img.caption,
-              order: img.order || 0,
-            })) || [],
-        },
+    const dataToCreate = {
+      title,
+      content,
+      status,
+      publishedAt: null,
+      reportId,
+      authorId: req.user.id,
+      images: {
+        create:
+          images?.map((img) => ({
+            url: img.url,
+            filename: img.filename,
+            alt: img.alt,
+            caption: img.caption,
+            order: img.order || 0,
+          })) || [],
       },
+    };
+
+    if (status === "PUBLISHED" && !publishedAt) {
+      dataToCreate.publishedAt = new Date();
+    } else if (publishedAt) {
+      dataToCreate.publishedAt = new Date(publishedAt);
+    }
+
+    const newNarrative = await prisma.narrative.create({
+      data: dataToCreate,
       include: {
         images: true,
       },
@@ -101,14 +116,21 @@ exports.updateNarrative = async (req, res) => {
   const { title, content, status, publishedAt } = req.body;
 
   try {
+    const dataToUpdate = {
+      title,
+      content,
+      status,
+    };
+
+    if (status === "PUBLISHED" && !publishedAt) {
+      dataToUpdate.publishedAt = new Date();
+    } else if (publishedAt) {
+      dataToUpdate.publishedAt = new Date(publishedAt);
+    }
+
     const updatedNarrative = await prisma.narrative.update({
       where: { id },
-      data: {
-        title,
-        content,
-        status,
-        publishedAt: publishedAt ? new Date(publishedAt) : undefined,
-      },
+      data: dataToUpdate,
     });
 
     res.json({
@@ -164,6 +186,7 @@ exports.getPublishedNarratives = async (req, res) => {
         status: "PUBLISHED",
       },
       select: {
+        id: true,
         title: true,
         content: true,
         publishedAt: true,
