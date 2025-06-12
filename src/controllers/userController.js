@@ -71,7 +71,7 @@ exports.getUserById = async (req, res) => {
 
 exports.createUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role, polsekId } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -89,6 +89,12 @@ exports.createUser = async (req, res) => {
       });
     }
 
+    if (role === "POLSEK" && !polsekId) {
+      return res.status(400).json({
+        message: "Polsek ID wajib diisi untuk role POLSEK",
+      });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await prisma.user.create({
@@ -96,11 +102,19 @@ exports.createUser = async (req, res) => {
         name,
         email,
         password: hashedPassword,
+        role,
+        polsekId,
       },
       select: {
         id: true,
         name: true,
         email: true,
+        role: true,
+        polsek: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
 
