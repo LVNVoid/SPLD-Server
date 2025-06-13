@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const helmet = require("helmet");
 const reportRouter = require("./routes/reportRouter");
 const userRouter = require("./routes/userRouter");
 const narrativeRouter = require("./routes/narrativeRouter");
@@ -22,6 +23,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use(helmet());
 app.use(cookieParser());
 
 app.use("/api/upload", uploadRouter);
