@@ -19,7 +19,7 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
+    origin: ["http://localhost:5173", "https://spld-server.vercel.app/"],
     credentials: true,
   })
 );
