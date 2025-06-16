@@ -4,13 +4,13 @@ const cors = require("cors");
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 
-// Router imports
 const reportRouter = require("../src/routes/reportRouter");
 const userRouter = require("../src/routes/userRouter");
 const narrativeRouter = require("../src/routes/narrativeRouter");
 const authRouter = require("../src/routes/authRouter");
 const uploadRouter = require("../src/routes/uploadRouter");
 const polsekRouter = require("../src/routes/polsekRouter");
+const statsRouter = require("../src/routes/statsRouter");
 
 // Init
 dotenv.config();
@@ -32,6 +32,7 @@ app.use("/api/upload", uploadRouter);
 app.use("/api/reports", reportRouter);
 app.use("/api/polseks", polsekRouter);
 app.use("/api/users", userRouter);
+app.use("/api/stats", statsRouter);
 app.use("/api/narratives", narrativeRouter);
 app.use("/api/auth", authRouter);
 
