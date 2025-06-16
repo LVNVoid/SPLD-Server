@@ -199,6 +199,9 @@ exports.getPublishedNarratives = async (req, res) => {
         images: { take: 1 },
         author: { select: { name: true } },
       },
+      orderBy: {
+        publishedAt: "desc",
+      },
     });
 
     if (!publishedNarratives || publishedNarratives.length === 0) {
