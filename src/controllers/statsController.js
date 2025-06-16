@@ -15,7 +15,7 @@ exports.getStats = async (req, res) => {
       data: {
         reports: { total: reportsCount },
         narratives: { total: narrativesCount },
-        polseks: { total: narrativesCount },
+        polseks: { total: polseksCount },
         users: { total: usersCount },
       },
     });
